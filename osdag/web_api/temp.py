@@ -14,7 +14,7 @@ class DesignPreference(APIView):
     @api_view(['GET'])
     def get(self, request):
         supported_section = request.GET.get("supported_section")
-        cookie_id = request.COOKIES.get('fin_plate_connection_session')
+        cookie_id = request.COOKIES.get('connection_session')
         print(supported_section)
 
         #if cookie_id == None or cookie_id == '': 

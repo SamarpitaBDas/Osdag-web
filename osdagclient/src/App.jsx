@@ -14,6 +14,7 @@ import Sidebar from './components/Sidebar';
 import Mainwindow from './components/Mainwindow';
 import Window from './components/Window';
 import FinePlate from './components/shearConnection/FinePlate';
+import CleatAngle from './components/shearConnection/CleatAngle';
 import { GlobalProvider } from './context/GlobalState';
 import { ModuleProvider } from './context/ModuleState';
 import { UserContext, UserProvider } from './context/UserState';
@@ -50,9 +51,15 @@ function App() {
         <Route path='/design-type/:designType' element={<Window />} />
         {/* Wrap FinePlate with a route that checks authentication */}
         <Route
-          path='/design/:designType/:item'
+          path='/design/:designType/fin_plate'
           element={
              <FinePlate /> 
+          }
+        />
+        <Route
+          path='/design/:designType/cleat_angle'
+          element={
+             <CleatAngle /> 
           }
         />
       <Route path='/user' element={<UserAccount />} />

@@ -25,6 +25,7 @@ let initialValue = {
     boltDiameterList: [],
     thicknessList: [],
     propertyClassList: [],
+    angleList: [],
     sessionCreated: false,
     sendNextRequests: false,
     setTheCookie: false,
@@ -222,9 +223,23 @@ export const ModuleProvider = ({ children }) => {
         }
     }
 
-    const createSession = async () => {
+    const getCleatAngleList = async () => {
         try {
-            const requestData = { 'module_id': 'Fin Plate Connection' }
+            const response = await fetch(`${BASE_URL}populate?moduleName=${state.currentModuleName}&angleList=Customized`, {
+                method: 'GET',
+                mode: 'cors',
+                credentials: 'include'
+            });
+            const jsonResponse = await response?.json()
+            dispatch({ type: 'SET_CLEAT_ANGLE_LIST', payload: jsonResponse })
+        } catch (error) {
+            console.log('error : ', error)
+        }
+    }
+
+    const createSession = async (moduleId) => {
+        try {
+            const requestData = { 'module_id': moduleId ?? 'Fin Plate Connection' }
             const response = await fetch(`${BASE_URL}sessions/create`, {
                 method: 'POST',
                 mode: 'cors',
@@ -238,12 +253,19 @@ export const ModuleProvider = ({ children }) => {
             const data = await response.json()
             if (data['status'] == 'set') {
                 // fetch the connectivityList 
-                getConnectivityList('Fin-Plate-Connection')
-                getColumnBeamMaterialList(state.currentModuleName, 'Column-Flange-Beam-Web')
-                getBoltDiameterList()
-                getThicknessList()
-                getPropertyClassList()
-
+                getConnectivityList(data['module_name'] || 'Fin-Plate-Connection')
+                .then(() => {
+                    getColumnBeamMaterialList(state.currentModuleName, 'Column-Flange-Beam-Web')
+                    getBoltDiameterList()
+                    getPropertyClassList()
+                    console.log(data)
+                    if (data['module_name'] == "Fin-Plate-Connection") {
+                        getThicknessList()
+                    } else if(data['module_name'] == "Cleat-Angle-Connection") {
+                    console.log("data")
+                    getCleatAngleList()
+                    }
+                })
             } else {
                 state.sendNextRequests = false
             }
@@ -308,9 +330,14 @@ export const ModuleProvider = ({ children }) => {
         }
     }
 
-    const createDesign = async (param) => {
+    const API_ENDPOINTS = {
+        "cleat_angle": "cleat-angle-connection"
+    };
+
+    const createDesign = async (param, connection_type) => {
+        const outputEndpoint = API_ENDPOINTS[connection_type] ? API_ENDPOINTS[connection_type] : "fin-plate-connection";
         try {
-            const response = await fetch(`${BASE_URL}calculate-output/fin-plate-connection`, {
+            const response = await fetch(`${BASE_URL}calculate-output/${outputEndpoint}`, {
                 method: 'POST',
                 mode: 'cors',
                 headers: {
@@ -528,6 +555,7 @@ export const ModuleProvider = ({ children }) => {
             boltDiameterList: state.boltDiameterList,
             thicknessList: state.thicknessList,
             propertyClassList: state.propertyClassList,
+            angleList: state.angleList,
             sessionCreated: state.sessionCreated,
             sendNextRequests: state.sendNextRequests,
             setTheCookie: state.setTheCookie,
@@ -562,7 +590,7 @@ export const ModuleProvider = ({ children }) => {
             updateSourceAndMechType,
             getMaterialDetails,
             updateMaterialListFromCaches,
-            addCustomMaterialToDB
+            addCustomMaterialToDB,
         }}>
             {children}
         </ModuleContext.Provider>

@@ -1,182 +1,140 @@
-<p align="center"> 
-  <img src = "https://user-images.githubusercontent.com/19147922/27816506-9f15355a-60a9-11e7-98cc-585312264801.png"><br>
-  Open Steel Design and Graphics <br><br>
-  <a href="http://osdag.fossee.in/">Osdag on Cloud</a><br><br>
-  Osdag on Cloud is a web-based free/libre and open-source software for the design (and detailing) of steel structures, following the Indian Standard IS 800:2007. It allows the user to design steel connections, members and systems using a graphical user interface. The interactive GUI provides a 3D visualisation of the designed component and an option to export the CAD model to any drafting software for the creation of construction/fabrication drawings. The design is typically optimised following industry best practices.
+# Osdag on Cloud Setup and Contributions
 
-</p>
+## Setting Up Osdag on Cloud
 
-## Table of contents
-* <a href="#quick-start">Quick start</a>
-* <a href="#contribute">Contributing</a>
-* <a href="#license">Copyright and license</a>
+refer to https://github.com/osdag-admin/Osdag-web for setting up osdag on cloud.
 
-## <a id="user-content-quick-start" class="anchor" href="#quick-start" aria-hidden="true"></a> Quick start
+<!-- To set up Osdag on Cloud--screening task, follow these specific steps:
 
-#### System Requirements:
-Operating System: 
-Ubuntu LTS 20.04 / 22.04
-Hardware Requirements:
-Minimum 4 Gb RAM
-Minimum of 1 Gb of free disk space
+1. **Update Package Lists and Install Dependencies**:  
+   Open your terminal and run the following commands:
+   ```bash
+   sudo apt-get update
+   sudo apt-get install -y texlive-latex-extra
+   ```
 
-This setup script is for machines running Ubuntu that do not have Miniconda3. 
-If you have Miniconda3 already installed on your computer, please skip Step/Command 1 and proceed to Step/Command 2.
+2. **Extract the Osdag Web ZIP File**:  
+   Download the Osdag web application ZIP file and extract it. Navigate to the extracted folder.
 
+3. **Activate Your Conda Environment**:  
+   Activate your conda environment (if applicable) using the command:
+   ```bash
+   conda activate
+   ```
 
-Installation steps:
-===================
+4. **Enter the PostgreSQL Terminal**:  
+   Access the PostgreSQL terminal by running:
+   ```bash
+   sudo -u postgres psql
+   ```
 
-Installing Python version 3
-Command 1:
-	sudo apt update
-Command 2:
-	sudo apt install python3
-Command 3:
-	python3 --version
-	
-Installing GCC
-Command 1:
-	sudo apt update
-Command 2:
-	sudo apt install build-essential
-Command 3:
-	gcc --version
-	
-The Osdag on Cloud project uses ’Conda’ environment which contains all the dependencies. To first download these, visit the link : https://osdag.fossee.in/resources/downloads
-and download the Installer [Release:2021-02-15] for Ubuntu.
-    
-Extract the downloaded installer using the Archive Manager/File-Roller, or using 
-the following command on the bash prompt:
+5. **Create a New Role**:  
+   In the PostgreSQL terminal, create a new role for the Osdag developer:
+   ```sql
+   CREATE ROLE osdagdeveloper PASSWORD 'password' SUPERUSER CREATEDB CREATEROLE INHERIT REPLICATION LOGIN;
+   ```
 
-	tar -xvf Osdag_ubuntu_installer_v2021.02.a.a12f.tar.gz
- 
- 
-Note: If you have already installed the  previous version of Osdag in your system then delete the same.
-It is mandatory to execute Commands 1 and 2 to successfully install this version of Osdag. 
-If you have LaTeX installed you may skip Step/Command 3.
- 
-In bash, navigate to the extracted installation folder containing the shell 
-scripts (the folder that contains this README file) and a folder named Osdag, 
-and enter Command 1, Command 2 and Command 3 given below.  
+6. **Create a New Database**:  
+   Next, create a new database with the newly created role:
+   ```sql
+   CREATE DATABASE "postgres_Intg_osdag" WITH OWNER osdagdeveloper;
+   ```
 
- 
-Note: After entering Command 1, while installing Miniconda3, you will be asked  
-whether you wish to set the system default python to Miniconda3. You need to agree  
-to this, in order for the second command to work. After installing Miniconda3 close the terminal.
-Re-open the terminal at the same location and execute Command 2 and/or Command 3 respectively.
+7. **Exit the PostgreSQL Terminal**:  
+   To exit the PostgreSQL terminal, type:
+   ```sql
+   \q
+   ```
 
-You will need internet connection to execute Step/Command 3.
+8. **Navigate to the Osdag Web Directory**:  
+   Change your directory to the cloned Osdag web folder:
+   ```bash
+   cd path/to/extracted/Osdag-web
+   ```
 
-    Step/Command 1:
-        bash 1-install-Miniconda3-latest-Linux-x86_64.sh
-        
-    Step/Command 2:
-        bash 2-install-osdag.sh
-        
-    Step/Command 3:
-	bash 3-install-texlive.sh
+9. **Switch to the Develop Branch**:  
+   Ensure you are on the develop branch:
+   ```bash
+   git checkout develop
+   ```
 
+10. **Install Required Python Packages**:  
+    Install the necessary Python packages specified in `requirements.txt`:
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-    Running Osdag:
-    =============
-    After the installation is complete, you may copy/move the extracted Osdag folder
-    to a location of your choice (say, directly under your home folder).
-    
-    Using the Command:
-    In the bash prompt, navigate to the Osdag directory and enter the following command
-        
-        python osdagMainPage.py
+11. **Configure the PostgreSQL Database**:  
+    Run the following commands to set up the database:
+    ```bash
+    python populate_database.py
+    python update_sequences.py
+    python manage.py migrate
+    ```
 
-    Running Osdag on Cloud:
-    ======================
-    Node v16.20.0 : Install Node from NVM by running these commands in the terminal
+12. **Install Node.js Dependencies**:  
+    Navigate to the Osdag client directory and install Node.js dependencies:
+    ```bash
+    cd osdagclient
+    npm install
+    cd ..
+    ```
 
-    Command 1:
-    	cd ~
-    Command 2:
-	curl -sL https://deb.nodesource.com/setup_16.x -o nodesource_setup.sh
-    Command 3:
-	sudo bash nodesource_setup.sh
-    Command 4:
-    	sudo apt-get install nodejs
-    Command 5:
-    	node -v
-    	
-    Postgres : Install Postgres by running the following commands
-    Command 1:
-    	sudo sh -c 'echo "deb https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
-    Command 2:
-    	wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-    Command 3:
-    	sudo apt-get update
-    Command 4:
-    	sudo apt-get -y install postgresql
+13. **Start the Django Server**:  
+    Launch the Django development server:
+    ```bash
+    python manage.py runserver 8000
+    ```
 
-    Freecad : Install freecad with the following commands 
-    Command 1:
-    	cd /
-    Command 2:
-    	sudo apt-get update
-    Command 3:
-    	sudo apt-get install snapd
-    Command 4:
-    	sudo snap install freecad
-    	
-    Installing Vite
-    	Command 1:
-    		sudo apt-get -y install vite
+14. **Run the Client Development Server**:  
+    Open another terminal window, navigate to the Osdag client folder, and run:
+    ```bash
+    cd osdagclient
+    npm run dev
+    ```
 
-    Setting up Osdag on Cloud
+15. **Access the Application**:  
+    Open your web browser and navigate to:
+    ```
+    http://localhost:5173/
+    ``` -->
 
-    sudo apt-get update
-    sudo apt-get install -y texlive-latex-extra
-    git clone https://github.com/SurajBhosale003/Osdag-web.git
-    conda activate
+## My Screening Task Contributions
 
-    Enter into the Postgres Terminal
-        sudo -u postgres psql
-    Create a new role
-        CREATE ROLE osdagdeveloper PASSWORD 'password' SUPERUSER CREATEDB CREATEROLE INHERIT REPLICATION LOGIN;
-    Create a database
-        CREATE DATABASE "postgres_Intg_osdag" WITH OWNER osdagdeveloper;
-    Exit fron the Postgres terminal
-        \q
+As part of the screening task for the Osdag on Cloud project, I focused on developing key features and functionalities that enhance the application's usability and performance. 
+Below are my contributions in brief:
 
-    Enter into the Osdag-web folder which you have cloned
-        cd Desktop/Osdag-web
-    Switch to "develop" branch
-        git checkout develop
-    Install requirements.txt packages
-        pip install -r requirements.txt
-    Configure the Postgres database
-        python populate_database.py
-        python update_sequences.py
-        python manage.py migrate
-    Install the node dependencies
-        cd osdagclient
-        npm install
-        cd ..
+1. **UI Development for Cloud Module**:  
+   Created a user interface for the Osdag cloud module that mirrors the functionality of the desktop version, ensuring a consistent user experience across platforms.
 
-    Start the Django server
-        python manage.py runserver 8000
-    Open another terminal, navigate to root of Osdag-web folder and run the following commands
-        cd osdagclient
-        npm run dev
+2. **Cleat Angle Endpoint Development**:  
+   Developed an endpoint for the cleat angle, modeled after the already implemented fin plate and end plate modules. This involved creating an input data folder that contains `cleatangleinputdata`, `fin_plate_input_data`, and `input_data_base`, which accept user data and manage connectivity and error handling.
 
-    Now your server and client should be running. Navigate to http://localhost:5173/ on your browser.
-## Contributing
-Osdag on Cloud invites enthusiasts with similar interest(s) to contribute to Osdag on Cloud development. Your contributions can go a long way in improving the software.
-Please take a moment to review the <a href= "https://github.com/osdag-admin/Osdag/blob/master/CONTRIBUTING.md">guidelines for contributing</a>.
+3. **Menu Items Configuration**:  
+   Created a `menuitems.json` file to include items from both the fin plate and cleat angle modules, allowing for reusability and flexibility. Modified the code to support multiple sessions.
 
-   * Bug reports
-   * Feature requests
-   * Pull requests
+4. **API Logic for Cleat Angle Connection Module**:  
+   Developed the API logic for the cleat angle connection module with several key functions:
+   - modified an api to handle both cleat angle and fin plate connections.
+   - then the angles are populated in case of cleat angle connections
+   - the required keys are validated i.e. Checked that all required parameters are provided and of the correct data type.
+   - using create module an instance is created of the cleat angle connection module design class.
+   - from input values instantiates the module design class using input values.
+   - modified the calculation logic so that the input can be handled for cleat angle and fin plate sessions.
+   - then a CAD model is generated from the input values and returns the file path.
 
+5. **Integration with Connection Flow**:  
+   Created a `cleat_angle_connection` under the connection flow to facilitate input passing and output generation in the Osdag API modules. Updated the different files to include the new module in the system's architecture.
 
-## <a id="user-content-license" class="anchor" href="#license" aria-hidden="true"></a> Copyright and license
-(c) Copyright Osdag contributors 2020.<br>
-This program comes with ABSOLUTELY NO WARRANTY. This is free software, and you are welcome to redistribute it under certain conditions. See the <a href="https://github.com/osdag-admin/Osdag/files/1207162/License.txt">License.txt</a> file for details regarding the license.
-The beta version of Osdag is released under the terms and conditions of the GNU LESSER GENERAL PUBLIC LICENSE (LGPL) Version 3.
+## Screenshots
 
-=============================== End of File ===============================
+### Frontend Cleat Angle 
+![Input Vlues](./screenshots/ss1.png)
+![Output Values](./screenshots/ss2.png)
+
+### Output Data Screenshot
+![Output Screenshot](./screenshots/output.png)
+
+### Input Data Screenshot
+![Input Data Screenshot](./screenshots/input.png)
+

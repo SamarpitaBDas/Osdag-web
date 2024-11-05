@@ -4,7 +4,85 @@ import { Input, Modal } from 'antd';
 import spacingIMG from '../assets/spacing_3.png'
 import capacityIMG1 from '../assets/L_shear1.png'
 import capacityIMG2 from '../assets/L.png'
-const placeholderOutput = {
+
+const placeholderoutputcleat = {
+    Cleat: [
+      {
+        label: "Cleat Angle Designation",
+        val: 0
+      },
+      {
+        label: "Shear Yielding Capacity (kN)",
+        val: 0
+      },
+      {
+        label: "Block Shear Capacity (kN)",
+        val: 0
+      },
+      {
+        label: "Moment Demand(kNm)",
+        val: 0
+      },
+      {
+        label: "Moment Capacity(kNm)",
+        val: 0
+      },
+	  {
+        label: "Bolt Columns (nos)",
+        val: 0
+      },
+		{
+        label: "Bolt Rows (nos)", 
+        val: 0
+      },
+      {
+        label: "Bolt Force (kN)",
+        val: 0
+      },
+		{
+		label: "Capacity",
+		val:0
+		}
+    ],
+    Bolt: [
+      {
+        label: "Gauge Distance 1 (mm)",
+        val: 0
+      },
+		{
+        label: "Diameter (mm)",
+        val: 0
+      },
+		{
+        label: "Property Class",
+        val: 0
+      },
+	  {
+        label: "Bolt Columns (nos)",
+        val: 0
+      },
+		{
+        label: "Bolt Rows (nos)", 
+        val: 0
+      },
+      {
+        label: "Bolt Force (kN)",
+        val: 0
+      },
+      {
+        label: "Bolt Value  (kN)",
+        val: 0
+      },
+      {
+        label: "Bolt Value  (kN)",
+        val: 0
+      }
+    ]
+}
+
+
+const placeholderOutputFin = {
+	
 	Bolt: [
 		{
 			label: "Diameter (mm)",
@@ -61,16 +139,21 @@ const placeholderOutput = {
 	]
 }
 
+const displayOrder = ['Cleat', 'Bolt'];
 
 const platePopUpFields = ['Shear Yielding Capacity (kN)', 'Rupture Capacity (kN)', 'Block Shear Capacity (kN)', 'Tension Yielding Capacity (kN)', 'Tension Rupture Capacity (kN)', 'Axial Block Shear Capacity (kN)', 'Moment Demand (kNm)', 'Moment Capacity (kNm)']
 const boltPopUpFields = ['Pitch Distance (mm)', 'End Distance (mm)', 'Edge Distance (mm)']
 
-const OutputDock = ({ output }) => {
+const OutputDock = ({ output, connectionType }) => {
 
 	const [spacingModel, setSpacingModel] = useState(false);
 	const [capacityModel, setCapacityModel] = useState(false);
 
-	// console.log('output : ' , output, output && Object.keys(output).length)
+	const isCleatConnection = connectionType === "Cleat Angle Connection";
+    const placeholderOutput = isCleatConnection ? placeholderoutputcleat : placeholderOutputFin;
+
+
+	console.log('output : ' , output, output && Object.keys(output).length)
 	const handleDialogSpacing = (value) => {
 		if (value === 'Spacing') {
 			setSpacingModel(true);
@@ -88,7 +171,8 @@ const OutputDock = ({ output }) => {
 		<div>
 			<h5>Output Dock</h5>
 			<div className='subMainBody scroll-data'>
-				{(output && Object.keys(output).length) ? Object.keys(output).map((key, index) => {
+				{(output && Object.keys(output).length) ? displayOrder.map((key, index) => {
+				// {(output && Object.keys(output).length) ? Object.keys(output).map((key, index) => {
 					return (
 						<>
 							<div key={index}>

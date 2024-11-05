@@ -55,19 +55,27 @@ from osdag.serializers import Design_Serializer
 """
 
 
+MODULE_NAME_FROM_CON_TYPE = {
+    "cleat-angle-connection": "Cleat Angle Connection",
+    "fin-plate-connection": "Fin Plate Connection"
+}
+
 @method_decorator(csrf_exempt, name='dispatch')
 class OutputData(APIView):
 
-    def post(self, request):
-        print("Inside post method of OutputData")
+    def post(self, request, connection_type):
+        if not (connection_type in MODULE_NAME_FROM_CON_TYPE):
+            return Response('Module Not Supported', status=status.HTTP_400_BAD_REQUEST)
+            
+        module_name = MODULE_NAME_FROM_CON_TYPE.get(connection_type)
+        print("Inside post method of OutputData for module:", module_name)
 
-        # obtaining the session, module_id, input_values
-        cookie_id = request.COOKIES.get('fin_plate_connection_session')
-        module_api = get_module_api('Fin Plate Connection')
+        cookie_id = request.COOKIES.get("connection_session")
+
         input_values = request.data
         tempData = {
             'cookie_id': cookie_id,
-            'module_id': 'Fin Plate Connection',
+            'module_id': module_name,
             'input_values': input_values
         }
         print('tempData : ', tempData)
@@ -94,6 +102,7 @@ class OutputData(APIView):
         new_logs = []
         try:
             try:
+                module_api = get_module_api(module_name)
                 output, logs = module_api.generate_output(input_values)
             except Exception as e : 
                 print('e : ' , e)

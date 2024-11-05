@@ -33,7 +33,7 @@ class CreateDesignReport(APIView):
         # obtain teh cookies
         metadata = request.data.get('metadata')
         print('metadata : ' , metadata)
-        cookie_id = request.COOKIES.get('fin_plate_connection_session')
+        cookie_id = request.COOKIES.get('connection_session')
         print('cookie_id : ', cookie_id)
 
         # obtain the currenct working directory as it gets changed in the osdag desktop code, then 
@@ -146,7 +146,7 @@ class GetPDF(APIView):
 
         # check cookie
         try:
-            cookie_id = request.COOKIES.get('fin_plate_connection_session')
+            cookie_id = request.COOKIES.get('connection_session')
             print('cookie id in getPDF:', cookie_id)
         except Exception as e:
             print('e:', e)
@@ -225,7 +225,7 @@ class CompanyLogoView(APIView) :
         print('inside company logo post') 
         # check cookie
         try:
-            cookie_id = request.COOKIES.get('fin_plate_connection_session')
+            cookie_id = request.COOKIES.get('connection_session')
             print('cookie id in companyLogo:', cookie_id)
         except Exception as e:
             print('e:', e)

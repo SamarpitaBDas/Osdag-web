@@ -2272,6 +2272,8 @@ class CommonDesignLogic(object):
     def create2Dcad(self):
         ''' Returns the 3D model of finplate depending upon component
         '''
+        
+        print("inside create2dcad")
 
         final_model = None
         cadlist = []

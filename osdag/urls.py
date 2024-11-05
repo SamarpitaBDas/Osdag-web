@@ -77,8 +77,7 @@ urlpatterns = [
     path('user/obtain-input-file/' , ObtainInputFileView.as_view()),
     path('user/set-refresh/' , SetRefreshTokenCookieView.as_view()),
 
-    # output generation from input
-    path('calculate-output/fin-plate-connection',
-         OutputData.as_view(), name='fin-plate-connection'),
-
+#     output generation from input
+    path('calculate-output/<str:connection_type>',
+         OutputData.as_view(), name='connection-type'),
 ]

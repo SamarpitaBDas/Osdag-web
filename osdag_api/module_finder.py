@@ -1,4 +1,5 @@
 from osdag_api.modules import fin_plate_connection
+from osdag_api.modules import cleat_angle_connection
 from types import ModuleType
 import typing
 from typing import Dict, Any, List, _Protocol
@@ -31,7 +32,8 @@ class ModuleApiType(_Protocol):
         """Generate the CAD model from input values as a BREP file. Return file path."""
         pass
 module_dict : Dict[str, ModuleApiType] = {
-    'Fin Plate Connection': fin_plate_connection
+    'Fin Plate Connection': fin_plate_connection,
+    'Cleat Angle Connection': cleat_angle_connection
 } 
 def get_module_api(module_id: str) -> ModuleApiType:
     """Return the api for the specified module"""

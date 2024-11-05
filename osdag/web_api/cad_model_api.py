@@ -22,6 +22,7 @@ import json
 import os
 import subprocess
 import time
+import sys
 
 # rest_framework
 from rest_framework import status
@@ -43,7 +44,7 @@ class CADGeneration(View):
 
     def get(self, request: HttpRequest):
         # Get design session id.
-        cookie_id = request.COOKIES.get("fin_plate_connection_session")
+        cookie_id = request.COOKIES.get("connection_session")
         print(cookie_id)
         # Error Checking: If design session id provided.
         if cookie_id == None or cookie_id == '':
@@ -58,7 +59,7 @@ class CADGeneration(View):
             try : 
                 design_session = Design.objects.get(cookie_id=cookie_id)
             except : 
-                print('Error in obtaining the fin_plate_connection_session')
+                print('Error in obtaining the connection_session')
             
             try : 
                 module_api = get_module_api(
@@ -127,6 +128,8 @@ class CADGeneration(View):
             macro_path = os.path.join(
                 parent_dir, 'freecad_utils/open_brep_file.FCMacro')
             command = '/snap/bin/freecad.cmd'
+            if sys.platform == "win32":
+                command = "D:\\Softwares\\FreeCad\\bin\\FreeCADCmd.exe"
             # path = 'file_storage/cad_models/Uv9aURCfBDmhoosxMUy2UT7P3ghXcvV3_Model.brep'
             path_to_file = os.path.join(parent_dir, path)
             output_dir = os.path.join(

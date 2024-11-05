@@ -1,28 +1,3 @@
-"""
-Api for Fin Plate Connection module
-Functions:
-    get_required_keys() -> List[str]:
-        Return all required input parameters for the module.
-    validate_input(input_values: Dict[str, Any]) -> None:
-        Go through all the input parameters.
-        Check if all required parameters are given.
-        Check if all parameters are of correct data type.
-    create_module() -> FinPlateConnection:
-        Create an instance of the fin plate connection module design class and set it up for use
-    create_from_input(input_values: Dict[str, Any]) -> FinPlateConnection
-        Create an instance of the fin plate connection module design class from input values.
-    generate_output(input_values: Dict[str, Any]) -> Dict[str, Any]:
-        Generate, format and return the input values from the given output values.
-            Output format (json): {
-                "Bolt.Pitch": 
-                    "key": "Bolt.Pitch",
-                    "label": "Pitch Distance (mm)"
-                    "value": 40
-                }
-            }
-    create_cad_model(input_values: Dict[str, Any], section: str, session: str) -> str:
-        Generate the CAD model from input values as a BREP file. Return file path.
-"""
 from osdag_api.validation_utils import validate_arr, validate_num, validate_string
 from osdag_api.errors import MissingKeyError, InvalidInputTypeError
 from osdag_api.utils import contains_keys, custom_list_validation, float_able, int_able, is_yes_or_no, validate_list_type
@@ -30,17 +5,18 @@ import osdag_api.modules.shear_connection_common as scc
 from OCC.Core import BRepTools
 from cad.common_logic import CommonDesignLogic
 # Will log a lot of unnessecary data.
-from design_type.connection.fin_plate_connection import FinPlateConnection
+from design_type.connection.cleat_angle_connection import CleatAngleConnection
 import sys
 import os
 import typing
 from typing import Dict, Any, List
+import traceback
+
 old_stdout = sys.stdout  # Backup log
 sys.stdout = open(os.devnull, "w")  # redirect stdout
 sys.stdout = old_stdout  # Reset log
 
-
-def get_required_keys() -> List[str]:
+def get_required_keys_cleat_angle() -> List[str]:
     return [
         "Bolt.Bolt_Hole_Type",
         "Bolt.Diameter",
@@ -54,7 +30,6 @@ def get_required_keys() -> List[str]:
         "Detailing.Corrosive_Influences",
         "Detailing.Edge_type",
         "Detailing.Gap",
-        "Load.Axial",
         "Load.Shear",
         "Material",
         "Member.Supported_Section.Designation",
@@ -67,73 +42,63 @@ def get_required_keys() -> List[str]:
         "Connector.Plate.Thickness_List",
     ]
 
-
-def validate_input(input_values: Dict[str, Any]) -> None:
-    """Validate type for all values in design dict. Raise error when invalid"""
-
-    # Check if all required keys exist
-    required_keys = get_required_keys()
-    # Check if input_values contains all required keys.
+def validate_input(input_values: Dict[str,Any])-> None:
+    #check iif all required keys exist 
+    required_keys = get_required_keys_cleat_angle()
+    # check if input_values contains all required keys
     missing_keys = contains_keys(input_values, required_keys)
-    if missing_keys != None:  # If keys are missing.
-        # Raise error for the first missing key.
+    if missing_keys != None: #if keys are missing.
+        #Raise error for the first missinf key.
         raise MissingKeyError(missing_keys[0])
-
-    # Validate key types one by one:
-
-    # Validate Bolt.Bolt_Hole_Type.
-    # Check if Bolt.Bolt_Hole_Type is a string.
-    if not isinstance(input_values["Bolt.Bolt_Hole_Type"], str):
-        # If not, raise error.
-        raise InvalidInputTypeError("Bolt.Bolt_Hole_Type", "str")
-
-     # Validate Bolt.Diameter.
-    bolt_diameter = input_values["Bolt.Diameter"]
-    if (not isinstance(bolt_diameter, list)  # Check if Bolt.Diameter is a list.
-            # Check if all items in Bolt.Diameter are str.
-            or not validate_list_type(bolt_diameter, str)
-            or not custom_list_validation(bolt_diameter, int_able)):  # Check if all items in Bolt.Diameter can be converted to int.
-        # If any of these conditions fail, raise error.
+    
+    #check if Cleat.Angle_Type is a string.
+    if not isinstance(input_values["Bolt.Bolt_Hole_Type"],str):
+        #if not raise an error
+        raise InvalidInputTypeError("Bolt.Bolt_Hole_Type")
+    
+    #validate Bolt Diameter
+    bolt_diameter =input_values["Bolt.Diameter"]
+    if (not isinstance(bolt_diameter,list)
+        or not validate_list_type(bolt_diameter,str)
+        or not custom_list_validation(bolt_diameter)):
         raise InvalidInputTypeError(
-            "Bolt.Diameter", "non empty List[str] where all items can be converted to int")
-
-    # Validate Bolt.Grade
+            "Bolt.Diameter","non empty List[str] where all items can be converted to int"
+        )
+        
+    # validate cleat grade
     bolt_grade = input_values["Bolt.Grade"]
-    if (not isinstance(bolt_grade, list)  # Check if Bolt.Grade is a list.
-            # Check if all items in Bolt.Grade are str.
-            or not validate_list_type(bolt_grade, str)
-            or not custom_list_validation(bolt_grade, float_able)):  # Check if all items in Bolt.Grade can be converted to float.
-        # If any of these conditions fail, raise error.
+    if(not isinstance(bolt_grade,list)
+        or not validate_list_type(bolt_grade,str)
+        or not custom_list_validation(bolt_grade,float_able)):
+        
+        #if any condition fail raise an error
         raise InvalidInputTypeError(
-            "Bolt.Grade", "non empty List[str] where all items can be converted to float")
-
-    # Validate Bolt.Slip_Factor
+            "Bolt.Grade", "non empty List[str] where all items can be converted to float"
+        )
+    
+    #Validate Cleat.Slip_Factor
     bolt_slipfactor = input_values["Bolt.Slip_Factor"]
-    if (not isinstance(bolt_slipfactor, str)  # Check if Bolt.Slip_Factor is a string.
-            or not float_able(bolt_slipfactor)):  # Check if Bolt.Slip_Factor can be converted to float.
-        # If any of these conditions fail, raise error.
+    if (not isinstance(bolt_slipfactor,str)
+        or not float_able(bolt_slipfactor)):
         raise InvalidInputTypeError(
-            "Bolt.Slip_Factor", "str where str can be converted to float")
-
-    # Validate Bolt.TensionType
-    # Check if Bolt.TensionType is a string.
+            "Bolt.Slip_Factor", "str where str can be converted to float"
+        )
+        
+    #Validate Cleat.TensionType
     if not isinstance(input_values["Bolt.TensionType"], str):
         # If not, raise error.
         raise InvalidInputTypeError("Bolt.TensionType", "str")
-
-    # Validate Bolt.Type
-    # Check if Bolt.Type is a string.
+    
+    #Validate Cleat.Type
     if not isinstance(input_values["Bolt.Type"], str):
         raise InvalidInputTypeError("Bolt.Type", "str")  # If not, raise error.
 
-    # Validate Connectivity
-    # Check if Connectivity is a string.
+    # validate connectivity
     if not isinstance(input_values["Connectivity"], str):
         # If not, raise error.
         raise InvalidInputTypeError("Connectivity", "str")
 
-    # Validate Connector.Material
-    # Check if Connector.Material is a string.
+    #Validate Connector Material
     if not isinstance(input_values["Connector.Material"], str):
         # If not, raise error.
         raise InvalidInputTypeError("Connector.Material", "str")
@@ -165,14 +130,7 @@ def validate_input(input_values: Dict[str, Any]) -> None:
         raise InvalidInputTypeError(
             "Detailing.Gap", "str where str can be converted to int")
 
-    # Validate Load.Axial
-    load_axial = input_values["Load.Axial"]
-    if (not isinstance(load_axial, str)  # Check if Load.Axial is a string.
-            or not int_able(load_axial)):  # Check if Load.Axial can be converted to int.
-        # If any of these conditions fail, raise error.
-        raise InvalidInputTypeError(
-            "Load.Axial", "str where str can be converted to int")
-
+    
     # Validate Load.Shear
     load_shear = input_values["Load.Shear"]
     if (not isinstance(load_shear, str)  # Check if Load.Shear is a string.
@@ -245,7 +203,7 @@ def validate_input_new(input_values: Dict[str, Any]) -> None:
     """Validate type for all values in design dict. Raise error when invalid"""
 
     # Check if all required keys exist
-    required_keys = get_required_keys()
+    required_keys = get_required_keys_cleat_angle()
     print('required_keys : ' , required_keys)
     # Check if input_values contains all required keys.
     missing_keys = contains_keys(input_values, required_keys)
@@ -255,6 +213,7 @@ def validate_input_new(input_values: Dict[str, Any]) -> None:
         print("missing keys is not None")
         raise MissingKeyError(missing_keys[0])
 
+    
     # Validate key types using loops.
 
     # Validate all strings.
@@ -284,7 +243,6 @@ def validate_input_new(input_values: Dict[str, Any]) -> None:
     # Validate for keys that are numbers
     num_keys = [("Bolt.Slip_Factor", True)  # List of all parameters that are numbers (key, is_float)
                 ("Detailing.Gap", False),
-                ("Load.Axial", False),
                 ("Load.Shear", False),
                 ("Weld.Material_Grade_OverWrite", False)]
     for key in num_keys:  # Loop through all keys.
@@ -301,15 +259,13 @@ def validate_input_new(input_values: Dict[str, Any]) -> None:
         # Check if key is a list where all items can be converted to numbers. If not, raise error.
         validate_arr(key[0], key[1])
 
-
-def create_module() -> FinPlateConnection:
+def create_module() -> CleatAngleConnection:
     """Create an instance of the fin plate connection module design class and set it up for use"""
-    module = FinPlateConnection()  # Create an instance of the FinPlateConnection
+    module = CleatAngleConnection()  # Create an instance of the FinPlateConnection
     module.set_osdaglogger(None)
     return module
 
-
-def create_from_input(input_values: Dict[str, Any]) -> FinPlateConnection:
+def create_from_input(input_values: Dict[str, Any]) -> CleatAngleConnection:
     """Create an instance of the fin plate connection module design class from input values."""
     # validate_input(input_values)
     try : 
@@ -322,11 +278,11 @@ def create_from_input(input_values: Dict[str, Any]) -> FinPlateConnection:
     try : 
         module.set_input_values(input_values)
     except Exception as e : 
+        traceback.print_exc()
         print('e in set_input_values : ' , e)
         print('error in setting the input values')
 
     return module
-
 
 def generate_output(input_values: Dict[str, Any]) -> Dict[str, Any]:
     """
@@ -347,9 +303,9 @@ def generate_output(input_values: Dict[str, Any]) -> Dict[str, Any]:
     # Generate output values in unformatted form.
     raw_output_text = module.output_values(True)
     raw_output_spacing = module.spacing(True)  # Generate output val
-    raw_output_capacities = module.capacities(True)
+    # raw_output_capacities = module.capacities(True)
     logs = module.logs
-    raw_output = raw_output_capacities + raw_output_spacing + raw_output_text
+    raw_output = raw_output_spacing + raw_output_text
     # os.system("clear")
     # Loop over all the text values and add them to ouptut dict.
     for param in raw_output:
@@ -370,10 +326,11 @@ def create_cad_model(input_values: Dict[str, Any], section: str, session: str) -
     if section not in ("Model", "Beam", "Column", "Plate"):  # Error checking: If section is valid.
         raise InvalidInputTypeError(
             "section", "'Model', 'Beam', 'Column' or 'Plate'")
-    module = create_from_input(input_values)  # Create module from input.
+    module = create_from_input(input_values)  # Cr`eate module from input.
     print('module from input values : ' , module)
     # Object that will create the CAD model.
     try : 
+        print(module.module)
         cld = CommonDesignLogic(None, '', module.module , module.mainmodule)
     except Exception as e : 
         print('error in cld e : ' , e)
@@ -382,7 +339,6 @@ def create_cad_model(input_values: Dict[str, Any], section: str, session: str) -
         # Setup the calculations object for generating CAD model.
         scc.setup_for_cad(cld, module)
     except Exception as e : 
-        import traceback
         traceback.print_exc()
         print('Error in setting up cad e : ' , e)
 
@@ -413,5 +369,6 @@ def create_cad_model(input_values: Dict[str, Any], section: str, session: str) -
         print('Writing to BREP file failed e : ' , e)
     
     return file_path
+
 
 

@@ -1,0 +1,56 @@
+{
+    "Bolt": [
+		{
+			"label": "Diameter (mm)",
+			"val": 0
+		},
+		{
+			"label": "Property Class",
+			"val": 0
+		},
+		{
+			"label": "shear Capacity (KN)",
+			"val": 0
+		},
+		{
+			"label": "Bolt Force (KN)",
+			"val": 0
+		},
+		{
+			"label": "Bolt Column (nos)",
+			"val": 0	
+		},
+		{
+			"label": "Bolt Rows (nos)",
+			"val": 0
+		}
+	],
+	"Plate": [
+		{
+			"label": "Thickness (mm)",
+			"val": 0
+		},
+		{
+			"label": "Height (mm)",
+			"val": 0
+		},
+		{
+			"label": "Length (mm)",
+			"val": 0
+		}
+	],
+	"Weld": [
+		{
+			"label": "Size (mm)",
+			"val": 0
+		},
+		{
+			"label": "Strength (N/mm2)",
+			"val": 0
+		},
+		{
+			"label": "Stress (N/mm)",
+			"val": 0
+		}
+	]
+}
